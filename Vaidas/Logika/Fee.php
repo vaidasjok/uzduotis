@@ -5,13 +5,13 @@ class Fee {
 
 	// gets array values for each entity in euros: count of transactions per week and amount of transactions
 	// per week.
-	public function array_get_count_and_amount_eur_a_week(array $initial_data, $id, $date ) {
+	public function array_get_count_and_amount_eur_a_week(array $initial_data, $id, $date, $transaction ) {
 		$count = 0;
 		(double) $amount_a_week = 0;
 		foreach($initial_data as $data) {
-			if ($data[1] == $id) {
+			if ($data[1] == $id && $transaction == $data[3]) {
 				// finding the time interval for a current week.
-				if(strtotime($data[0]) > strtotime('last monday', strtotime($date)) && strtotime($data[0]) <= strtotime($date)) {
+				if(strtotime($data[0]) > strtotime('last monday', strtotime($date)) && strtotime($data[0]) <= strtotime($date) ) {
 					//counting number of transactions during the current week.
 					$count++;
 
@@ -40,7 +40,7 @@ class Fee {
 	public function add_columns(array $initial_data) {
 		$result_array = [];
 		foreach($initial_data as $data) {
-			$result = $this->array_get_count_and_amount_eur_a_week($initial_data, $data[1], $data[0]);
+			$result = $this->array_get_count_and_amount_eur_a_week($initial_data, $data[1], $data[0], $data[3]);
 		
 			array_push($data, $result[0]);
 			array_push($data, $result[1]);
@@ -76,7 +76,7 @@ class Fee {
 				$amount_eur = $amount;
 				break;
 			case "USD":
-				$amount_eur = $amount / USD;
+				$amount_eur= $amount / USD;
 				break;
 			case "JPY":
 				$amount_eur = $amount / JPY;
@@ -93,10 +93,10 @@ class Fee {
 							$fee = number_format(round_up($fee, 2), 2, '.', '');
 							break;
 						case "USD":
-							$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+							$fee = number_format(round_up($fee, 2), 2, '.', '');
 							break;
 						case "JPY":
-							$fee = number_format(ceil($fee / JPY), 0, '.', '');
+							$fee = number_format(ceil($fee), 0, '.', '');
 							break;
 					}
 
@@ -104,18 +104,29 @@ class Fee {
 
 				}
 			} elseif ($count <= 3 && $amount_eur == $amount_a_week) {
-				$amount_to_fee = $amount - 1000;
+				$amount_to_fee = $amount_eur - 1000;
 				if ($amount_to_fee > 0) {
+					switch(trim($currency)) {
+						case "EUR":
+							$amount_to_fee = $amount_to_fee;
+							break;
+						case "USD":
+							$amount_to_fee = $amount_to_fee / USD;
+							break;
+						case "JPY":
+							$amount_to_fee = $amount_to_fee / JPY;
+							break;
+					}
 					$fee = $amount_to_fee * 0.003;
 					switch(trim($currency)) {
 						case "EUR":
 							$fee = number_format(round_up($fee, 2), 2, '.', '');
 							break;
 						case "USD":
-							$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+							$fee = number_format(round_up($fee, 2), 2, '.', '');
 							break;
 						case "JPY":
-							$fee = number_format(ceil($fee / JPY), 0, '.', '');
+							$fee = number_format(ceil($fee), 0, '.', '');
 							break;
 					}
 				} else {
@@ -125,10 +136,10 @@ class Fee {
 							$fee = number_format(round_up($fee, 2), 2, '.', '');
 							break;
 						case "USD":
-							$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+							$fee = number_format(round_up($fee, 2), 2, '.', '');
 							break;
 						case "JPY":
-							$fee = number_format(ceil($fee / JPY), 0, '.', '');
+							$fee = number_format(ceil($fee), 0, '.', '');
 							break;
 					}
 				}
@@ -143,10 +154,10 @@ class Fee {
 					$fee = number_format(round_up($fee, 2), 2, '.', '');
 					break;
 				case "USD":
-					$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+					$fee = number_format(round_up($fee, 2), 2, '.', '');
 					break;
 				case "JPY":
-					$fee = number_format(ceil($fee / JPY), 0, '.', '');
+					$fee = number_format(ceil($fee), 0, '.', '');
 					break;
 			}
 			
