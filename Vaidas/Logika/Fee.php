@@ -11,7 +11,7 @@ class Fee {
 		foreach($initial_data as $data) {
 			if ($data[1] == $id && $transaction == $data[3]) {
 				// finding the time interval for a current week.
-				if(strtotime($data[0]) > strtotime('last monday', strtotime($date)) && strtotime($data[0]) <= strtotime($date) ) {
+				if((strtotime($data[0]) > strtotime('last monday', strtotime($date)) || strtotime($data[0]) == strtotime('monday this week', strtotime($date))) && strtotime($data[0]) <= strtotime($date) ) {
 					//counting number of transactions during the current week.
 					$count++;
 
@@ -85,23 +85,35 @@ class Fee {
 		if(trim($legal_form) == "natural") {
 		//if less that 3 times and if less than 1000€ - no fee
 			if( $count <= 3 && $amount_eur != $amount_a_week ) {
-				$negative_discount = 1000 - $amount_a_week;
-				if($amount_eur >= $negative_discount) {
-					$fee = $amount * 0.003;
+				$former_transactions_amount = $amount_a_week - $amount_eur;
+				$discount_left = 1000 - $former_transactions_amount;
+				if($discount_left > $amount_eur) {
+					$fee = 0.00;
 					switch(trim($currency)) {
 						case "EUR":
 							$fee = number_format(round_up($fee, 2), 2, '.', '');
 							break;
 						case "USD":
-							$fee = number_format(round_up($fee, 2), 2, '.', '');
+							$fee = number_format(round_up($fee * USD, 2), 2, '.', '');
 							break;
 						case "JPY":
-							$fee = number_format(ceil($fee), 0, '.', '');
+							$fee = number_format(ceil($fee * JPY), 0, '.', '');
 							break;
 					}
 
 				} else {
-
+					$fee = ($amount_eur - $discount_left) * 0.003;
+					switch(trim($currency)) {
+						case "EUR":
+							$fee = number_format(round_up($fee, 2), 2, '.', '');
+							break;
+						case "USD":
+							$fee = number_format(round_up($fee * USD, 2), 2, '.', '');
+							break;
+						case "JPY":
+							$fee = number_format(ceil($fee * JPY), 0, '.', '');
+							break;
+					}
 				}
 			} elseif ($count <= 3 && $amount_eur == $amount_a_week) {
 				$amount_to_fee = $amount_eur - 1000;
@@ -111,10 +123,10 @@ class Fee {
 							$amount_to_fee = $amount_to_fee;
 							break;
 						case "USD":
-							$amount_to_fee = $amount_to_fee / USD;
+							$amount_to_fee = $amount_to_fee * USD;
 							break;
 						case "JPY":
-							$amount_to_fee = $amount_to_fee / JPY;
+							$amount_to_fee = $amount_to_fee * JPY;
 							break;
 					}
 					$fee = $amount_to_fee * 0.003;
