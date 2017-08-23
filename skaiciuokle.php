@@ -15,6 +15,7 @@ if (defined('STDIN')) {
 	}
 }
 
+
 // TOLIAU GAUNAME DUOMENU MASYVA SU SEKANCIA STRUKTURA:
 // [0] => data, [1] => id, [2] => juridine forma, [3] => operacijos tipas, [4] =>  operacijos suma,
 // [5] => valiuta, [6] => operaciju kiekis per savaite, [7] => operaciju suma per savaite iki konkrecios operacijos.
@@ -24,30 +25,31 @@ if (defined('STDIN')) {
 // Tai daroma tam, kad supaprastinti skaiciavimu procesa (skaiciavimai atliekami tik tarp masyvo stulpeliu).
 $prepare = new Fee();
 $array_elements = $prepare->add_columns($initial_data);
-echo print_r($array_elements);
 
 // ****** #DUOMENU RENGIMO PABAIGA ******
 
-
+echo print_r($array_elements);
 
 
 
 // ******* KOMISINIU SKAICIAVIMAS *******
-
+$fees = [];
 foreach($array_elements as $element) {
 	if(trim($element[3]) == "cash_in") {
-		echo $prepare->cash_in($element[4], $element[5]);
+		array_push($fees, $prepare->cash_in($element[4], $element[5]));
 	} elseif(trim($element[3]) == "cash_out") {
-		echo $prepare->cash_out($element[2], $element[4], $element[7], $element[6], $element[5]);
+		array_push($fees, $prepare->cash_out($element[2], $element[4], $element[7], $element[6], $element[5]));
 	}
 }
 
 
-/*
-foreach($duomenys as $duomuo) {
-	fwrite(STDOUT, $duomuo);
+
+
+
+foreach($fees as $fee) {
+	fwrite(STDOUT, "$fee\n");
 }
-*/
+
 
 
 

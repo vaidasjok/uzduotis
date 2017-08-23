@@ -51,56 +51,107 @@ class Fee {
 
 // Fee calculation part
 	public function cash_in($amount, $currency) {
-		$fee = $amount * 0.003;
+		$fee = $amount * 0.0003;
 		($fee > 5) ? $fee = 5 : $fee;
 		switch(trim($currency)) {
 			case "EUR":
-			case "USD":
 				$fee = number_format(round_up($fee, 2), 2, '.', '');
 				break;
+			case "USD":
+				$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+				break;
 			case "JPY":
-				$fee = number_format(ceil($fee), 0, '.', '');
+				$fee = number_format(ceil($fee / JPY), 0, '.', '');
 				break;
 		}
-		return number_format($fee, 2, '.', '') . "/";
+		return number_format($fee, 2, '.', '');
 	}
 
 
 	public function cash_out($legal_form, $amount, $amount_a_week, $count, $currency) {
 		// NATURAL
-		if($legal_form == "natural") {
+		$fee = 0.00;
+		switch(trim($currency)) {
+			case "EUR":
+				$amount_eur = $amount;
+				break;
+			case "USD":
+				$amount_eur = $amount / USD;
+				break;
+			case "JPY":
+				$amount_eur = $amount / JPY;
+				break;
+		}
+		if(trim($legal_form) == "natural") {
 		//if less that 3 times and if less than 1000€ - no fee
-			if($count <= 3 && $amount <= 1000.00) {
-				$fee = number_format(0.00, 2, '.', '');
-			} elseif($count > 3 || $amount > 1000.00) {
-		// if more than 3 times or if more than 1000€ - 0.003 (0.3%)
-				$fee = $amount * 0.003;
-				switch(trim($currency)) {
-					case "EUR":
-					case "USD":
-						$fee = number_format(round_up($fee, 2), 2, '.', '');
-						break;
-					case "JPY":
-						$fee = number_format(ceil($fee), 0, '.', '');
-						break;
+			if( $count <= 3 && $amount_eur != $amount_a_week ) {
+				$negative_discount = 1000 - $amount_a_week;
+				if($amount_eur >= $negative_discount) {
+					$fee = $amount * 0.003;
+					switch(trim($currency)) {
+						case "EUR":
+							$fee = number_format(round_up($fee, 2), 2, '.', '');
+							break;
+						case "USD":
+							$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+							break;
+						case "JPY":
+							$fee = number_format(ceil($fee / JPY), 0, '.', '');
+							break;
+					}
+
+				} else {
+
 				}
+			} elseif ($count <= 3 && $amount_eur == $amount_a_week) {
+				$amount_to_fee = $amount - 1000;
+				if ($amount_to_fee > 0) {
+					$fee = $amount_to_fee * 0.003;
+					switch(trim($currency)) {
+						case "EUR":
+							$fee = number_format(round_up($fee, 2), 2, '.', '');
+							break;
+						case "USD":
+							$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+							break;
+						case "JPY":
+							$fee = number_format(ceil($fee / JPY), 0, '.', '');
+							break;
+					}
+				} else {
+					$fee = number_format(0.00, 2, '.', '');
+					switch(trim($currency)) {
+						case "EUR":
+							$fee = number_format(round_up($fee, 2), 2, '.', '');
+							break;
+						case "USD":
+							$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+							break;
+						case "JPY":
+							$fee = number_format(ceil($fee / JPY), 0, '.', '');
+							break;
+					}
+				}
+				
 			}
 		// LEGAL
-		} elseif($legal_form == "legal") {
+		} elseif(trim($legal_form) == "legal") {
 			$fee = $amount * 0.003;
 			($fee < 0.50) ? $fee = 0.50 : $fee;
 			switch(trim($currency)) {
 				case "EUR":
-				case "USD":
 					$fee = number_format(round_up($fee, 2), 2, '.', '');
 					break;
+				case "USD":
+					$fee = number_format(round_up($fee / USD, 2), 2, '.', '');
+					break;
 				case "JPY":
-					$fee = number_format(ceil($fee), 0, '.', '');
+					$fee = number_format(ceil($fee / JPY), 0, '.', '');
 					break;
 			}
 			
 		}
-		return $fee . "/";
+		return $fee;
 	}
 
 
